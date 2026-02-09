@@ -47,7 +47,7 @@ const HomeScreen = () => {
             }
         };
         fetchUsers();
-    }, [contacts.length, hasFetched, setContacts]);  
+    }, []);  
 
     // Reload danh sách khi quay lại màn hình home (sử dụng isFocused)
     useEffect(() => {
