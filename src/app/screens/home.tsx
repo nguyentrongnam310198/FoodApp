@@ -62,15 +62,21 @@ const HomeScreen = () => {
 
     //***Xử lý search
     const [keyword, setKeyword] = useState('');
-
     //*Lọc users theo `keyword` (tên) - case insensitive
     const filteredUsers = useMemo(() => {
         const q = keyword.trim().toLowerCase();
         if (!q) {
             console.log('[Home] Render filteredUsers:', users);
             return users;
+        //Logic: nếu q rỗng => trả về tất cả users
         }
         const filtered = users.filter(u => (u.name || '').toLowerCase().includes(q));
+        //Logic:
+            //1. lọc từng phần tử trong users và gán vào u
+            //2. lấy thuộc tính name của u, nếu name là falsy (null, undefined, '') thì thay bằng chuỗi rỗng '' để tránh lỗi
+            //3. chuyển name thành chữ thường
+            //4. includes(q) kiểm tra xem name có chứa chuỗi q hay không => trả về true/false
+            //4. nếu có filter giữ lại user đó
         console.log('[Home] Render filteredUsers (search):', filtered);
         return filtered;
     }, [users, keyword]);
