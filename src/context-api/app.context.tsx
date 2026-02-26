@@ -11,7 +11,7 @@ interface UserData {
     avatar?: string;
 }
 
-// Định nghĩa Context
+//***Định nghĩa Context --> đây là kiểu dữ liệu của toàn bộ app context
 interface AppContextType {
     user: UserData | null;
     setUser: (user: UserData | null) => void;
@@ -30,15 +30,17 @@ interface AppContextType {
     isFavorite: (contactId: string | number) => boolean;
 }
 
+//***Tạo đường ống Context
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+//***Nơi chứa dữ liệu global của app (App Context)
 export const AppProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserData | null>(null);
     const [appLoading, _setAppLoading] = useState(true);
     const [contacts, setContacts] = useState<any[]>([]);
     const [favorites, setFavorites] = useState<string[]>([]);
 
-    // Load favorites từ AsyncStorage khi app khởi động
+    //*Load favorites từ AsyncStorage khi app khởi động
     useEffect(() => {
         const loadFavorites = async () => {
             try {
@@ -53,7 +55,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         loadFavorites();
     }, []);
 
-    // Toggle favorite (compute synchronously from current state so caller can rely on updated value)
+    //*Hàm thêm/xóa contact khỏi danh sách yêu thích
     const toggleFavorite = async (contactId: string | number) => {
         const idStr = String(contactId);
         try {
@@ -62,8 +64,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             const newFavorites: string[] = currentlyFavorite
                 ? favorites.filter(id => String(id) !== idStr)
                 : [...favorites, idStr];
-
-            // Persist updated favorites and then update state so everything is consistent
+            
+            //*Lưu lại vào AsyncStorage
             try {
                 await AsyncStorage.setItem('favorites', JSON.stringify(newFavorites));
             } catch (err) {
@@ -72,7 +74,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
             setFavorites(newFavorites);
 
-            // Also update the contacts list so UI that depends on `contacts` updates immediately
+            //*Cập nhật lại danh sách contacts để UI phụ thuộc vào `contacts` cập nhật ngay lập tức
             setContacts(prevContacts => prevContacts.map(c => {
                 if (!c) return c;
                 return String(c.id) === idStr ? { ...c, isFavorite: !currentlyFavorite } : c;
@@ -83,7 +85,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // Check nếu contact là favorite (compare as strings to avoid type mismatch)
+    //*Check nếu contact là favorite (compare as strings to avoid type mismatch)
     const isFavorite = (contactId: string | number): boolean => {
         return favorites.some(f => String(f) === String(contactId));
     };
@@ -95,7 +97,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const logout = async () => {
-        // Chỉ logout trên provider (bỏ clear toàn bộ AsyncStorage để không xóa danh bạ/token)
+        //*Chỉ logout trên provider (bỏ clear toàn bộ AsyncStorage để không xóa danh bạ/token)
         try {
             setUser(null);
         } catch (error) {
@@ -104,7 +106,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const addContact = (c: any) => {
-        // prepend new contact so it appears first in lists
+        //*Thêm contact mới vào đầu danh sách
         setContacts(prev => [c, ...prev]);
     };
 
